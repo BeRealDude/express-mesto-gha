@@ -8,7 +8,7 @@ const app = express();
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.get('/', (req, res) => {
-  res.send('hello niga');
+  res.send('hello');
 });
 
 app.listen(PORT, () => {
