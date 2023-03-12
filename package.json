@@ -1,0 +1,35 @@
+{
+  "name": "express-mesto-gha",
+  "version": "1.0.0",
+  "description": "Проект Mesto фронтенд + бэкенд",
+  "main": "app.js",
+  "scripts": {
+    "lint": "npx eslint .",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BeRealDude/express-mesto-gha.git"
+  },
+  "keywords": [],
+  "author": "Vladislav N.",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BeRealDude/express-mesto-gha/issues"
+  },
+  "homepage": "https://github.com/BeRealDude/express-mesto-gha#readme",
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "eslint": "^8.36.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-require": "^0.0.1"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "mongoose": "^7.0.1",
+    "nodemon": "^2.0.21"
+  }
+}
