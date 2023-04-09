@@ -1,9 +1,13 @@
 const Card = require('../models/card');
 
+const INCORRECT_DATA = 400;
+const PAGE_NOT_FOUND = 404;
+const DEFAULT_ERROR = 500;
+
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -12,13 +16,18 @@ module.exports.createCard = (req, res) => {
 
   Card.create({ name, link, owner: idUser })
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'IncorrectDataError') {
+        return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные при создании карточки' });
+      }
+      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
+    });
 };
 
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.id)
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(() => res.status(PAGE_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена.' }));
 };
 
 module.exports.likeCard = (req, res) => {
@@ -31,7 +40,15 @@ module.exports.likeCard = (req, res) => {
     { new: true },
   )
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'IncorrectDataError') {
+        return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные для постановки лайка' });
+      }
+      if (err.name === 'NotFound') {
+        return res.status(PAGE_NOT_FOUND).send({ message: 'Передан несуществующий id карточки' });
+      }
+      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
+    });
 };
 
 module.exports.dislikeCard = (req, res) => {
@@ -44,5 +61,13 @@ module.exports.dislikeCard = (req, res) => {
     { new: true },
   )
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'IncorrectDataError') {
+        return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные для снятия лайка' });
+      }
+      if (err.name === 'NotFound') {
+        return res.status(PAGE_NOT_FOUND).send({ message: 'Передан несуществующий id карточки' });
+      }
+      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
+    });
 };
