@@ -48,7 +48,7 @@ module.exports.updateUser = (req, res) => {
     })
     .catch((err) => {
       console.log(err);
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные при обновлении профиля' });
       }
       return res.status(DEFAULT_ERROR).send({ message: 'Ошибка по умолчанию' });
@@ -59,7 +59,7 @@ module.exports.updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
   const { _id: idUser } = req.user;
 
-  User.findByIdAndUpdate(idUser, { avatar })
+  User.findByIdAndUpdate(idUser, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (user) return res.send({ data: user });
       return res.status(PAGE_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
