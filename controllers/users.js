@@ -7,18 +7,16 @@ const DEFAULT_ERROR = 500;
 module.exports.getUser = (req, res) => {
   User.find({})
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' }));
+    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'Пользователи не найдены' }));
 };
 
 module.exports.getUserId = (req, res) => {
   User.findById(req.params.id)
-    .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'NotFound') {
-        return res.status(PAGE_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
-      }
-      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
-    });
+    .then((user) => {
+      if (user) return res.send({ data: user });
+      return res.status(PAGE_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
+    })
+    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'Ошибка по умолчанию' }));
 };
 
 module.exports.createUser = (req, res) => {
@@ -27,10 +25,10 @@ module.exports.createUser = (req, res) => {
   User.create({ name, about, avatar })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.name === 'IncorrectDataError') {
+      if (err.name === 'ValidationError') {
         return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные при создании пользователя' });
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
+      return res.status(DEFAULT_ERROR).send({ message: 'Ошибка по умолчанию' });
     });
 };
 
@@ -39,15 +37,15 @@ module.exports.updateUser = (req, res) => {
   const { _id: idUser } = req.user;
 
   User.findByIdAndUpdate(idUser, { name, about })
-    .then((user) => res.send({ data: user }))
+    .then((user) => {
+      if (user) return res.send({ data: user });
+      return res.status(PAGE_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
+    })
     .catch((err) => {
-      if (err.name === 'IncorrectDataError') {
+      if (err.name === 'ValidationError') {
         return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные при обновлении профиля' });
       }
-      if (err.name === 'NotFound') {
-        return res.status(PAGE_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
-      }
-      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
+      return res.status(DEFAULT_ERROR).send({ message: 'Ошибка по умолчанию' });
     });
 };
 
@@ -56,14 +54,14 @@ module.exports.updateUserAvatar = (req, res) => {
   const { _id: idUser } = req.user;
 
   User.findByIdAndUpdate(idUser, { avatar })
-    .then((user) => res.send({ data: user }))
+    .then((user) => {
+      if (user) return res.send({ data: user });
+      return res.status(PAGE_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
+    })
     .catch((err) => {
-      if (err.name === 'IncorrectDataError') {
+      if (err.name === 'CastError') {
         return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные при обновлении аватара' });
       }
-      if (err.name === 'NotFound') {
-        return res.status(PAGE_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
-      }
-      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
+      return res.status(DEFAULT_ERROR).send({ message: 'Ошибка по умолчанию' });
     });
 };
