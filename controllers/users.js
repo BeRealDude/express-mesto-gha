@@ -42,7 +42,8 @@ module.exports.updateUser = (req, res) => {
       return res.status(PAGE_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      console.log(err);
+      if (err.name === 'CastError') {
         return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные при обновлении профиля' });
       }
       return res.status(DEFAULT_ERROR).send({ message: 'Ошибка по умолчанию' });
