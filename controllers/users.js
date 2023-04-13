@@ -16,7 +16,12 @@ module.exports.getUserId = (req, res) => {
       if (user) return res.send({ data: user });
       return res.status(PAGE_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
     })
-    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'Ошибка по умолчанию' }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные' });
+      }
+      return res.status(DEFAULT_ERROR).send({ message: 'Ошибка по умолчанию' });
+    });
 };
 
 module.exports.createUser = (req, res) => {
@@ -36,7 +41,7 @@ module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
   const { _id: idUser } = req.user;
 
-  User.findByIdAndUpdate(idUser, { name, about })
+  User.findByIdAndUpdate(idUser, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (user) return res.send({ data: user });
       return res.status(PAGE_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
