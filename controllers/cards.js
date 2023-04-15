@@ -30,8 +30,10 @@ module.exports.deleteCard = (req, res) => {
       if (card) return res.send({ data: card });
       return res.status(PAGE_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена.' });
     })
-    .catch(() => {
-      res.status(PAGE_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена.' });
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(INCORRECT_DATA).send({ message: 'Указан некорректный id при удалении карточки.' });
+      }
     });
 };
 
