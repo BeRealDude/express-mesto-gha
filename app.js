@@ -12,10 +12,6 @@ app.use(express.json());
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
-app.get('/', (req, res) => {
-  res.status(PAGE_NOT_FOUND).send({ message: 'Страница не найдена' });
-});
-
 app.use((req, res, next) => {
   req.user = {
     _id: '6410cdb64b99195afb3905a6',
@@ -26,6 +22,10 @@ app.use((req, res, next) => {
 
 app.use('/users', routerUser);
 app.use('/cards', routerCard);
+
+app.use((req, res) => {
+  res.status(PAGE_NOT_FOUND).send({ message: 'Страница не найдена' });
+});
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
