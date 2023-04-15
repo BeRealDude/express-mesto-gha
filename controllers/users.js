@@ -1,8 +1,5 @@
 const User = require('../models/user');
-
-const INCORRECT_DATA = 400;
-const PAGE_NOT_FOUND = 404;
-const DEFAULT_ERROR = 500;
+const { INCORRECT_DATA, PAGE_NOT_FOUND, DEFAULT_ERROR } = require('../error/error');
 
 module.exports.getUser = (req, res) => {
   User.find({})

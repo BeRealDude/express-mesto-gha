@@ -1,8 +1,5 @@
 const Card = require('../models/card');
-
-const INCORRECT_DATA = 400;
-const PAGE_NOT_FOUND = 404;
-const DEFAULT_ERROR = 500;
+const { INCORRECT_DATA, PAGE_NOT_FOUND, DEFAULT_ERROR } = require('../error/error');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
@@ -33,7 +30,7 @@ module.exports.deleteCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(INCORRECT_DATA).send({ message: 'Указан некорректный id при удалении карточки.' });
-      }
+      } else { res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' }); }
     });
 };
 
