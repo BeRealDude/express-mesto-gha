@@ -67,13 +67,13 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: idUser } },
     { new: true },
   )
-    .then((card) => res.send({ data: card }))
+    .then((card) => {
+      if (card) return res.send({ data: card });
+      return res.status(PAGE_NOT_FOUND).send({ message: 'Передан несуществующий id карточки' });
+    })
     .catch((err) => {
-      if (err.name === 'IncorrectDataError') {
+      if (err.name === 'CastError') {
         return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные для снятия лайка' });
-      }
-      if (err.name === 'NotFound') {
-        return res.status(PAGE_NOT_FOUND).send({ message: 'Передан несуществующий id карточки' });
       }
       return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
     });
