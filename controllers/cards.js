@@ -17,7 +17,7 @@ module.exports.createCard = (req, res) => {
   Card.create({ name, link, owner: idUser })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'IncorrectDataError') {
+      if (err.name === 'ValidationError') {
         return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные при создании карточки' });
       }
       return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
@@ -25,9 +25,14 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.id)
-    .then((card) => res.send({ data: card }))
-    .catch(() => res.status(PAGE_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена.' }));
+  Card.findByIdAndRemove(req.params.cardId)
+    .then((card) => {
+      if (card) return res.send({ data: card });
+      return res.status(PAGE_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена.' });
+    })
+    .catch(() => {
+      res.status(PAGE_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена.' });
+    });
 };
 
 module.exports.likeCard = (req, res) => {
