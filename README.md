@@ -1,5 +1,5 @@
 [![Tests](../../actions/workflows/tests-13-sprint.yml/badge.svg)](../../actions/workflows/tests-13-sprint.yml) [![Tests](../../actions/workflows/tests-14-sprint.yml/badge.svg)](../../actions/workflows/tests-14-sprint.yml)
-# Проект Mesto(backend)
+# Проект: Mesto(backend)
 
 ## Описание
 Проект составлен в рамках образовательной программы <a href="https://practicum.yandex.ru/">Яндекс Практикума</a>. Серверная часть проекта <a href ="https://github.com/berealdude/react-mesto-auth.git">Место</a> написанного на React.
