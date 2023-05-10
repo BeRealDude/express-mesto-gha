@@ -13,7 +13,7 @@ const app = express();
 app.use(express.json());
 
 const limiter = rateLimit({
-  max: 200,
+  max: 10000, // Перед сдачей исправить на 200!!!
   windowMs: 60 * 60 * 1000,
   message: 'Слишком много запросов с этого IP-адреса',
 });
