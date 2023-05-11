@@ -5,13 +5,16 @@ const {
   getUserId,
   updateUser,
   updateUserAvatar,
+  login,
 } = require('../controllers/users');
 
 router.get('/', getUser);
 
-router.get('/:id', getUserId);
+router.post('/signup', createUser);
 
-router.post('/', createUser);
+router.post('/signin', login);
+
+router.get('/:id', getUserId);
 
 router.patch('/me', updateUser);
 
