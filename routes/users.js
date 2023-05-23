@@ -6,18 +6,23 @@ const {
   updateUser,
   updateUserAvatar,
   login,
+  thisUser,
 } = require('../controllers/users');
 
-router.get('/', getUser);
+const auth = require('../middlewares/auth');
+
+router.get('/', auth, getUser);
+
+router.get('/me', auth, thisUser);
 
 router.post('/signup', createUser);
 
 router.post('/signin', login);
 
-router.get('/:id', getUserId);
+router.get('/:id', auth, getUserId);
 
-router.patch('/me', updateUser);
+router.patch('/me', auth, updateUser);
 
-router.patch('/me/avatar', updateUserAvatar);
+router.patch('/me/avatar', auth, updateUserAvatar);
 
 module.exports = router;

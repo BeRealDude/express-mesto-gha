@@ -21,17 +21,26 @@ module.exports.createCard = (req, res) => {
     });
 };
 
-module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => {
-      if (card) return res.send({ data: card });
-      return res.status(PAGE_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена.' });
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(INCORRECT_DATA).send({ message: 'Указан некорректный id при удалении карточки.' });
-      } else { res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' }); }
-    });
+module.exports.deleteCard = async (req, res) => {
+  const { _id: idUser } = req.user;
+  const { cardId } = req.params;
+  try {
+    const card = await Card.findById(cardId);
+    if (!card) return res.status(PAGE_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена.' });
+    const { owner: cardIdowner } = card;
+    if (cardIdowner.valueOf() !== idUser) {
+      res.send({ message: 'Недоступно' });
+    } else {
+      await card.deleteOne();
+      res.status(PAGE_NOT_FOUND).send({ message: 'Карточка удалена.' });
+    }
+  } catch (err) {
+    console.log('Ошибка', err);
+    if (err.name === 'CastError') {
+      res.status(INCORRECT_DATA).send({ message: 'Указан некорректный id при удалении карточки.' });
+    } else { res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' }); }
+  }
+  return true;
 };
 
 module.exports.likeCard = (req, res) => {

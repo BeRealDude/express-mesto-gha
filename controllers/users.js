@@ -23,6 +23,21 @@ module.exports.getUserId = (req, res) => {
     });
 };
 
+module.exports.thisUser = (req, res) => {
+  const { _id: idUser } = req.user;
+  User.findById(idUser)
+    .then((user) => {
+      if (user) return res.send({ user });
+      return res.status(PAGE_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные' });
+      }
+      return res.status(DEFAULT_ERROR).send({ message: 'Ошибка по умолчанию' });
+    });
+};
+
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
 
@@ -32,7 +47,7 @@ module.exports.login = (req, res) => {
       res.cookie('jwt', token, {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
-      }).send({ email });
+      }).send({ email, token });
     })
     .catch((err) => {
       res.status(401).send({ message: err.message });
