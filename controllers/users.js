@@ -2,24 +2,28 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const { INCORRECT_DATA, PAGE_NOT_FOUND, DEFAULT_ERROR } = require('../error/error');
+const PageNotFound = require('../error/page-not-found');
+const IncorrectData = require('../error/incorrect-data');
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User.find({})
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'Пользователи не найдены' }));
+    .catch((err) => next(err));
 };
 
-module.exports.getUserId = (req, res) => {
+module.exports.getUserId = (req, res, next) => {
   User.findById(req.params.id)
     .then((user) => {
       if (user) return res.send({ data: user });
-      return res.status(PAGE_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
+      throw new PageNotFound('Пользователь по указанному id не найден');
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные' });
+        console.log(err.name, 'blyt');
+        next(new IncorrectData('Переданы некорректные данные'));
+      } else {
+        next(err);
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'Ошибка по умолчанию' });
     });
 };
 

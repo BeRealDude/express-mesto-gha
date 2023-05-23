@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const routerUser = require('./routes/users');
 const routerCard = require('./routes/cards');
+const { errorCenter } = require('./middlewares/error-center');
 
 const { PAGE_NOT_FOUND } = require('./error/error');
 
@@ -30,6 +31,8 @@ app.use('/cards', routerCard);
 app.use((req, res) => {
   res.status(PAGE_NOT_FOUND).send({ message: 'Страница не найдена' });
 });
+
+app.use(errorCenter);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
