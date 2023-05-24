@@ -1,13 +1,15 @@
 const Card = require('../models/card');
-const { INCORRECT_DATA, PAGE_NOT_FOUND, DEFAULT_ERROR } = require('../error/error');
+const PageNotFound = require('../error/page-not-found');
+const IncorrectData = require('../error/incorrect-data');
+const NoAccess = require('../error/no-access');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' }));
+    .catch((err) => next(err));
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const { _id: idUser } = req.user;
 
@@ -15,35 +17,34 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные при создании карточки' });
+        next(new IncorrectData('Переданы некорректные данные при создании карточки'));
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
+      next(err);
     });
 };
 
-module.exports.deleteCard = async (req, res) => {
+module.exports.deleteCard = async (req, res, next) => {
   const { _id: idUser } = req.user;
   const { cardId } = req.params;
   try {
     const card = await Card.findById(cardId);
-    if (!card) return res.status(PAGE_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена.' });
+    if (!card) throw new PageNotFound('Карточка с указанным id не найдена.');
     const { owner: cardIdowner } = card;
     if (cardIdowner.valueOf() !== idUser) {
-      res.send({ message: 'Недоступно' });
+      throw new NoAccess('Недоступно');
     } else {
       await card.deleteOne();
-      res.status(PAGE_NOT_FOUND).send({ message: 'Карточка удалена.' });
+      throw new PageNotFound('Карточка удалена.');
     }
   } catch (err) {
-    console.log('Ошибка', err);
     if (err.name === 'CastError') {
-      res.status(INCORRECT_DATA).send({ message: 'Указан некорректный id при удалении карточки.' });
-    } else { res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' }); }
+      next(new IncorrectData('Указан некорректный id при удалении карточки.'));
+    } else { next(err); }
   }
   return true;
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   const { cardId } = req.params;
   const { _id: idUser } = req.user;
 
@@ -54,17 +55,17 @@ module.exports.likeCard = (req, res) => {
   )
     .then((card) => {
       if (card) return res.send({ data: card });
-      return res.status(PAGE_NOT_FOUND).send({ message: 'Передан несуществующий id карточки' });
+      throw new PageNotFound('Передан несуществующий id карточки');
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные для постановки лайка' });
+        next(new IncorrectData('Переданы некорректные данные для постановки лайка'));
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
+      next(err);
     });
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   const { cardId } = req.params;
   const { _id: idUser } = req.user;
 
@@ -75,12 +76,12 @@ module.exports.dislikeCard = (req, res) => {
   )
     .then((card) => {
       if (card) return res.send({ data: card });
-      return res.status(PAGE_NOT_FOUND).send({ message: 'Передан несуществующий id карточки' });
+      throw new PageNotFound('Передан несуществующий id карточки');
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные для снятия лайка' });
+        next(new IncorrectData('Переданы некорректные данные для снятия лайка'));
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'Произошла ошибка' });
+      next(err);
     });
 };

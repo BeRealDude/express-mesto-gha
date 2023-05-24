@@ -1,5 +1,6 @@
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const { errors } = require('celebrate');
 const express = require('express');
 const mongoose = require('mongoose');
 const routerUser = require('./routes/users');
@@ -31,7 +32,7 @@ app.use('/cards', routerCard);
 app.use((req, res) => {
   res.status(PAGE_NOT_FOUND).send({ message: 'Страница не найдена' });
 });
-
+app.use(errors());
 app.use(errorCenter);
 
 app.listen(PORT, () => {

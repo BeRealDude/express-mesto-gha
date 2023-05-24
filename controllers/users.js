@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-const { INCORRECT_DATA, PAGE_NOT_FOUND, DEFAULT_ERROR } = require('../error/error');
+const AccountUsed = require('../error/account-used');
 const PageNotFound = require('../error/page-not-found');
 const IncorrectData = require('../error/incorrect-data');
 
@@ -19,7 +19,6 @@ module.exports.getUserId = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        console.log(err.name, 'blyt');
         next(new IncorrectData('Переданы некорректные данные'));
       } else {
         next(err);
@@ -27,18 +26,19 @@ module.exports.getUserId = (req, res, next) => {
     });
 };
 
-module.exports.thisUser = (req, res) => {
+module.exports.thisUser = (req, res, next) => {
   const { _id: idUser } = req.user;
   User.findById(idUser)
     .then((user) => {
       if (user) return res.send({ user });
-      return res.status(PAGE_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
+      throw new PageNotFound('Пользователь по указанному id не найден');
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные' });
+        next(new IncorrectData('Переданы некорректные данные'));
+      } else {
+        next(err);
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'Ошибка по умолчанию' });
     });
 };
 
@@ -58,7 +58,7 @@ module.exports.login = (req, res) => {
     });
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     email, name, about, avatar,
   } = req.body;
@@ -67,45 +67,51 @@ module.exports.createUser = (req, res) => {
     .then((hash) => User.create({
       email, password: hash, name, about, avatar,
     }))
-    .then((user) => res.status(201).send({ _id: user._id, email: user.email }))
+    .then((user) => {
+      res.status(201).send({ email: user.email, _id: user._id });
+    })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные при создании пользователя' });
+      if (err.code === 11000) { // Не обрабатывает ошибку, понять почему
+        return next(new AccountUsed('Аккаунт с этой почтой уже существует'));
+      } if (err.name === 'ValidationError') {
+        next(new IncorrectData('Переданы некорректные данные при создании пользователя'));
+      } else {
+        next(err);
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'Ошибка по умолчанию' });
+      return true;
     });
 };
 
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;
   const { _id: idUser } = req.user;
 
   User.findByIdAndUpdate(idUser, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (user) return res.send({ data: user });
-      return res.status(PAGE_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
+      throw new PageNotFound('Пользователь по указанному id не найден');
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные при обновлении профиля' });
+        next(new IncorrectData('Переданы некорректные данные при обновлении профиля'));
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'Ошибка по умолчанию' });
+      next(err);
     });
 };
 
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   const { _id: idUser } = req.user;
 
   User.findByIdAndUpdate(idUser, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (user) return res.send({ data: user });
-      return res.status(PAGE_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
+      throw new PageNotFound('Пользователь по указанному id не найден');
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(INCORRECT_DATA).send({ message: 'Переданы некорректные данные при обновлении аватара' });
+        next(new IncorrectData('Переданы некорректные данные при обновлении аватара'));
       }
-      return res.status(DEFAULT_ERROR).send({ message: 'Ошибка по умолчанию' });
+      next(err);
     });
 };
