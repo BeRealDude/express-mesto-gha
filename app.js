@@ -3,6 +3,9 @@ const helmet = require('helmet');
 const { errors } = require('celebrate');
 const express = require('express');
 const mongoose = require('mongoose');
+const routerSignup = require('./routes/signup');
+const routerSignin = require('./routes/signin');
+
 const routerUser = require('./routes/users');
 const routerCard = require('./routes/cards');
 const { errorCenter } = require('./middlewares/error-center');
@@ -25,6 +28,9 @@ app.use(limiter);
 app.use(helmet());
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
+
+app.use('/', routerSignup);
+app.use('/', routerSignin);
 
 app.use('/users', routerUser);
 app.use('/cards', routerCard);
