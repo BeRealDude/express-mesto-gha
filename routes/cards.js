@@ -7,10 +7,9 @@ const {
   likeCard,
   dislikeCard,
 } = require('../controllers/cards');
+const regex = require('../utils/constants');
 
 const auth = require('../middlewares/auth');
-
-const regex = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([-.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/;
 
 router.get('/', auth, getCards);
 

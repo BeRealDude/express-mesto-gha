@@ -34,15 +34,11 @@ module.exports.thisUser = (req, res, next) => {
       throw new PageNotFound('Пользователь по указанному id не найден');
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new IncorrectData('Переданы некорректные данные'));
-      } else {
-        next(err);
-      }
+      next(err);
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -51,10 +47,10 @@ module.exports.login = (req, res) => {
       res.cookie('jwt', token, {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
-      }).send({ email, token });
+      }).status(200).send({ message: 'Авторизация прошла успешна' });
     })
     .catch((err) => {
-      res.status(401).send({ message: err.message });
+      next(err);
     });
 };
 
@@ -77,8 +73,7 @@ module.exports.createUser = (req, res, next) => {
         next(new IncorrectData('Переданы некорректные данные при создании пользователя'));
       } else {
         next(err);
-      }
-      return true;
+      } // Без return true, eslint говорит - Expected to return a value at the end of arrow function
     });
 };
 
@@ -92,9 +87,6 @@ module.exports.updateUser = (req, res, next) => {
       throw new PageNotFound('Пользователь по указанному id не найден');
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new IncorrectData('Переданы некорректные данные при обновлении профиля'));
-      }
       next(err);
     });
 };
@@ -109,9 +101,6 @@ module.exports.updateUserAvatar = (req, res, next) => {
       throw new PageNotFound('Пользователь по указанному id не найден');
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new IncorrectData('Переданы некорректные данные при обновлении аватара'));
-      }
       next(err);
     });
 };

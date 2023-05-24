@@ -7,10 +7,9 @@ const {
   updateUserAvatar,
   thisUser,
 } = require('../controllers/users');
+const regex = require('../utils/constants');
 
 const auth = require('../middlewares/auth');
-
-const regex = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([-.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/;
 
 router.get('/', auth, getUser);
 
@@ -18,20 +17,20 @@ router.get('/me', auth, thisUser);
 
 router.get('/:id', auth, celebrate({
   params: Joi.object().keys({
-    id: Joi.string().alphanum().required(),
+    id: Joi.string().length(24).hex().required(),
   }),
 }), getUserId);
 
 router.patch('/me', auth, celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
+    name: Joi.string().min(2).max(30).required(),
+    about: Joi.string().min(2).max(30).required(),
   }),
 }), updateUser);
 
 router.patch('/me/avatar', auth, celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().pattern(regex),
+    avatar: Joi.string().pattern(regex).required(),
   }),
 }), updateUserAvatar);
 

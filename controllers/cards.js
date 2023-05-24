@@ -34,7 +34,7 @@ module.exports.deleteCard = async (req, res, next) => {
       throw new NoAccess('Недоступно');
     } else {
       await card.deleteOne();
-      throw new PageNotFound('Карточка удалена.');
+      res.send({ message: 'Карточка удалена.' });
     }
   } catch (err) {
     if (err.name === 'CastError') {

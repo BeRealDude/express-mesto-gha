@@ -1,12 +1,11 @@
 const jwt = require('jsonwebtoken');
+const IncorrectToken = require('../error/incorrect-token');
 
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    return res
-      .status(401)
-      .send({ message: 'Необходима авторизация' });
+    return next(new IncorrectToken('Необходима авторизация'));
   }
 
   const token = authorization.replace('Bearer ', '');
@@ -15,9 +14,7 @@ module.exports = (req, res, next) => {
   try {
     payload = jwt.verify(token, 'super-strong-secret');
   } catch (err) {
-    return res
-      .status(401)
-      .send({ message: 'Необходима авторизация' });
+    return next(new IncorrectToken('Необходима авторизация'));
   }
 
   req.user = payload;

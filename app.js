@@ -10,7 +10,7 @@ const routerUser = require('./routes/users');
 const routerCard = require('./routes/cards');
 const { errorCenter } = require('./middlewares/error-center');
 
-const { PAGE_NOT_FOUND } = require('./error/error');
+const PageNotFound = require('./error/page-not-found');
 
 const { PORT = 3000 } = process.env;
 
@@ -35,8 +35,8 @@ app.use('/', routerSignin);
 app.use('/users', routerUser);
 app.use('/cards', routerCard);
 
-app.use((req, res) => {
-  res.status(PAGE_NOT_FOUND).send({ message: 'Страница не найдена' });
+app.use((req, res, next) => {
+  next(new PageNotFound('Страница не найдена'));
 });
 app.use(errors());
 app.use(errorCenter);
