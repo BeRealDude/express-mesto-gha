@@ -68,12 +68,12 @@ module.exports.createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.code === 11000) { // Не обрабатывает ошибку, понять почему
-        return next(new AccountUsed('Аккаунт с этой почтой уже существует'));
+        next(new AccountUsed('Аккаунт с этой почтой уже существует'));
       } if (err.name === 'ValidationError') {
         next(new IncorrectData('Переданы некорректные данные при создании пользователя'));
       } else {
         next(err);
-      } // Без return true, eslint говорит - Expected to return a value at the end of arrow function
+      }
     });
 };
 
