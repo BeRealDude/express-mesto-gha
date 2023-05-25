@@ -30,7 +30,7 @@ module.exports.thisUser = (req, res, next) => {
   const { _id: idUser } = req.user;
   User.findById(idUser)
     .then((user) => {
-      if (user) return res.send({ user });
+      if (user) return res.status(200).send({ user });
       throw new PageNotFound('Пользователь по указанному id не найден');
     })
     .catch((err) => {
